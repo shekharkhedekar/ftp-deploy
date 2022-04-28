@@ -1,7 +1,6 @@
 "use strict";
 
 const upath = require("upath");
-const util = require("util");
 const events = require("events");
 const Promise = require("bluebird");
 const fs = require("fs");
@@ -20,10 +19,11 @@ const lib = require("./lib");
 }
 */
 
-class FtpDeployer {
+class FtpDeployer extends events.EventEmitter {
     constructor(config) {
         // The constructor for the super class.
-        events.EventEmitter.call(this);
+        super();
+
         this.config = config;
         this.ftp = this.config.sftp ? new PromiseSftp() : new PromiseFtp();
         this.eventObject = {
@@ -197,7 +197,5 @@ class FtpDeployer {
             });
     };
 }
-
-util.inherits(FtpDeployer, events.EventEmitter);
 
 module.exports = FtpDeployer;
