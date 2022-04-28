@@ -14,10 +14,14 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var upath = require("upath");
-var events = require("events");
-var Promise = require("bluebird");
-var fs = require("fs");
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var upath_1 = __importDefault(require("upath"));
+var events_1 = __importDefault(require("events"));
+var bluebird_1 = __importDefault(require("bluebird"));
+var fs_1 = __importDefault(require("fs"));
 var PromiseFtp = require("promise-ftp");
 var PromiseSftp = require("ssh2-sftp-client");
 var lib = require("./lib");
@@ -35,9 +39,8 @@ var FtpDeployer = /** @class */ (function (_super) {
     function FtpDeployer(config) {
         var _this = _super.call(this) || this;
         _this.makeAllAndUpload = function (filemap) {
-            var _this = this;
             var keys = Object.keys(filemap);
-            return Promise.mapSeries(keys, function (key) {
+            return bluebird_1.default.mapSeries(keys, function (key) {
                 return _this.makeAndUpload(key, filemap[key]);
             });
         };
@@ -46,22 +49,23 @@ var FtpDeployer = /** @class */ (function (_super) {
                 return Promise.resolve("unused");
             }
             else {
-                return this.ftp.mkdir(newDirectory, true);
+                return _this.ftp.mkdir(newDirectory, true);
             }
         };
         // Creates a remote directory and uploads all of the files in it
         // Resolves a confirmation message on success
         _this.makeAndUpload = function (relDir, fnames) {
-            var _this = this;
-            var newDirectory = upath.join(this.config.remoteRoot, relDir);
-            return this.makeDir(newDirectory, true).then(function () {
-                return Promise.mapSeries(fnames, function (fname) {
-                    var tmpFileName = upath.join(_this.config.localRoot, relDir, fname);
-                    var tmp = fs.readFileSync(tmpFileName);
-                    _this.eventObject["filename"] = upath.join(relDir, fname);
+            var _a;
+            var newDirectory = upath_1.default.join(_this.config.remoteRoot, relDir);
+            // @ts-ignore TODO
+            return (_a = _this.makeDir(newDirectory)) === null || _a === void 0 ? void 0 : _a.then(function () {
+                return bluebird_1.default.mapSeries(fnames, function (fname) {
+                    var tmpFileName = upath_1.default.join(_this.config.localRoot, relDir, fname);
+                    var tmp = fs_1.default.readFileSync(tmpFileName);
+                    _this.eventObject["filename"] = upath_1.default.join(relDir, fname);
                     _this.emit("uploading", _this.eventObject);
                     return _this.ftp
-                        .put(tmp, upath.join(_this.config.remoteRoot, relDir, fname))
+                        .put(tmp, upath_1.default.join(_this.config.remoteRoot, relDir, fname))
                         .then(function () {
                         _this.eventObject.transferredFileCount++;
                         _this.emit("uploaded", _this.eventObject);
@@ -145,14 +149,14 @@ var FtpDeployer = /** @class */ (function (_super) {
             return Promise.resolve(_this.config);
         };
         _this.deploy = function (cb) {
-            var _this = this;
             return lib
-                .checkIncludes(this.config)
+                .checkIncludes(_this.config)
                 .then(lib.getPassword)
-                .then(this.connect)
-                .then(this.deleteRemote)
-                .then(this.checkLocalAndUpload)
+                .then(_this.connect)
+                .then(_this.deleteRemote)
+                .then(_this.checkLocalAndUpload)
                 .then(function (res) {
+                console.log({ res: res });
                 _this.ftp.end();
                 if (typeof cb == "function") {
                     cb(null, res);
@@ -182,5 +186,5 @@ var FtpDeployer = /** @class */ (function (_super) {
         return _this;
     }
     return FtpDeployer;
-}(events.EventEmitter));
-module.exports = FtpDeployer;
+}(events_1.default.EventEmitter));
+exports.default = FtpDeployer;
