@@ -12,8 +12,9 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "isolatedModules": true
+        "isolatedModules": true,
+        "declaration": true
     },
-    "include": ["./src/**/*"],
-    "exclude": ["./src/**/*.spec.js"]
+    "include": ["./src/ftp-deploy.ts"],
+    "exclude": []
 }
