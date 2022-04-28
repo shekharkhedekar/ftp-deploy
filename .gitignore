@@ -7,10 +7,6 @@ node_modules/
 # Editor
 ignore
 .vscode
-<<<<<<< HEAD
-=======
-test/remote/ftp
->>>>>>> 00f5bb6 (Add TS deps and build)
 
 # Test generated
 test/remote/ftp
