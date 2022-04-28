@@ -21,7 +21,6 @@ const lib = require("./lib");
 
 class FtpDeployer extends events.EventEmitter {
     constructor(config) {
-        // The constructor for the super class.
         super();
 
         this.config = config;
