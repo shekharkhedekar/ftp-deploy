@@ -25,11 +25,11 @@ describe("ftp-deploy.spec: deploy tests", () => {
     const remoteDir = path.join(__dirname, "../test/remote/ftp");
 
     it("should fail if badly configured", () => {
-        const d = new FtpDeploy();
         const configError = Object.assign({}, config, { port: 212 });
+        const d = new FtpDeploy(configError);
         return del(remoteDir)
             .then(() => {
-                return d.deploy(configError);
+                return d.deploy();
             })
             .catch((err) => {
                 // Should reject if file does not exist
@@ -41,11 +41,11 @@ describe("ftp-deploy.spec: deploy tests", () => {
             });
     });
     it("should fail with no include", () => {
-        const d = new FtpDeploy();
+        let c2 = Object.assign({}, config, { include: [] });
+        const d = new FtpDeploy(c2);
         return del(remoteDir)
             .then(() => {
-                let c2 = Object.assign({}, config, { include: [] });
-                return d.deploy(c2);
+                return d.deploy();
             })
             .catch((err) => {
                 if (err.code === "NoIncludes") {
@@ -56,10 +56,10 @@ describe("ftp-deploy.spec: deploy tests", () => {
             });
     });
     it("should put a file", () => {
-        const d = new FtpDeploy();
+        const d = new FtpDeploy(config);
         return del(remoteDir)
             .then(() => {
-                return d.deploy(config);
+                return d.deploy();
             })
             .then(() => {
                 // Should reject if file does not exist
@@ -68,15 +68,16 @@ describe("ftp-deploy.spec: deploy tests", () => {
             .catch((err) => Promise.reject(err));
     });
     it("should put a dot file", () => {
-        const d = new FtpDeploy();
+        config.include = [".*"];
+        const d = new FtpDeploy(config);
         return del(remoteDir)
             .then(() => {
-                config.include = [".*"];
-                return d.deploy(config);
+                return d.deploy();
             })
             .then(() => {
                 // Should reject if file does not exist
                 return statP(remoteDir + "/.testfile");
-            });
+            })
+            .catch((err) => Promise.reject(err));
     });
 });
