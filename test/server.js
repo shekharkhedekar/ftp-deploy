@@ -4,7 +4,6 @@ const path = require("path");
 // Using non-standard port
 const port = 2121;
 const homeDir = path.join(__dirname, "../test/remote");
-
 console.log("serving", homeDir);
 
 const options = {
