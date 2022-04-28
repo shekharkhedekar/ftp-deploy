@@ -223,6 +223,7 @@ class FtpDeployer extends events.EventEmitter {
             .then(this.deleteRemote)
             .then(this.checkLocalAndUpload)
             .then((res) => {
+                console.log({ res });
                 this.ftp.end();
                 if (typeof cb == "function") {
                     cb(null, res);

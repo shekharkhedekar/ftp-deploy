@@ -1,45 +1,95 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
+var __extends =
+    (this && this.__extends) ||
+    (function () {
+        var extendStatics = function (d, b) {
+            extendStatics =
+                Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array &&
+                    function (d, b) {
+                        d.__proto__ = b;
+                    }) ||
+                function (d, b) {
+                    for (var p in b)
+                        if (Object.prototype.hasOwnProperty.call(b, p))
+                            d[p] = b[p];
+                };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            if (typeof b !== "function" && b !== null)
+                throw new TypeError(
+                    "Class extends value " +
+                        String(b) +
+                        " is not a constructor or null"
+                );
+            extendStatics(d, b);
+            function __() {
+                this.constructor = d;
+            }
+            d.prototype =
+                b === null
+                    ? Object.create(b)
+                    : ((__.prototype = b.prototype), new __());
+        };
+    })();
+var __createBinding =
+    (this && this.__createBinding) ||
+    (Object.create
+        ? function (o, m, k, k2) {
+              if (k2 === undefined) k2 = k;
+              var desc = Object.getOwnPropertyDescriptor(m, k);
+              if (
+                  !desc ||
+                  ("get" in desc
+                      ? !m.__esModule
+                      : desc.writable || desc.configurable)
+              ) {
+                  desc = {
+                      enumerable: true,
+                      get: function () {
+                          return m[k];
+                      },
+                  };
+              }
+              Object.defineProperty(o, k2, desc);
+          }
+        : function (o, m, k, k2) {
+              if (k2 === undefined) k2 = k;
+              o[k2] = m[k];
+          });
+var __setModuleDefault =
+    (this && this.__setModuleDefault) ||
+    (Object.create
+        ? function (o, v) {
+              Object.defineProperty(o, "default", {
+                  enumerable: true,
+                  value: v,
+              });
+          }
+        : function (o, v) {
+              o["default"] = v;
+          });
+var __importStar =
+    (this && this.__importStar) ||
+    function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null)
+            for (var k in mod)
+                if (
+                    k !== "default" &&
+                    Object.prototype.hasOwnProperty.call(mod, k)
+                )
+                    __createBinding(result, mod, k);
+        __setModuleDefault(result, mod);
+        return result;
     };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+var __importDefault =
+    (this && this.__importDefault) ||
+    function (mod) {
+        return mod && mod.__esModule ? mod : { default: mod };
     };
-})();
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var upath_1 = __importDefault(require("upath"));
 var events_1 = __importDefault(require("events"));
@@ -64,8 +114,7 @@ var FtpDeployer = /** @class */ (function (_super) {
                 return _this.ftp.put(f, dir).then(function () {
                     return Promise.resolve();
                 });
-            }
-            else {
+            } else {
                 return _this.ftp.put(f, dir).then(function () {
                     return Promise.resolve();
                 });
@@ -74,21 +123,23 @@ var FtpDeployer = /** @class */ (function (_super) {
         // Wrapper of this.ftp.connect to handle disparate returns of PromiseFtp and PromiseSftp
         _this.ftpConnect = function () {
             if (_this.ftp instanceof ssh2_sftp_client_1.default) {
-                return _this.ftp.connect(_this.config).then(function (serverMessage) {
-                    return Promise.resolve(serverMessage);
-                });
-            }
-            else {
-                return _this.ftp.connect(_this.config).then(function (serverMessage) {
-                    return Promise.resolve(serverMessage);
-                });
+                return _this.ftp
+                    .connect(_this.config)
+                    .then(function (serverMessage) {
+                        return Promise.resolve(serverMessage);
+                    });
+            } else {
+                return _this.ftp
+                    .connect(_this.config)
+                    .then(function (serverMessage) {
+                        return Promise.resolve(serverMessage);
+                    });
             }
         };
         _this.makeDir = function (newDirectory) {
             if (newDirectory === "/") {
                 return Promise.resolve("unused");
-            }
-            else {
+            } else {
                 return _this.ftp.mkdir(newDirectory, true);
             }
         };
@@ -96,28 +147,54 @@ var FtpDeployer = /** @class */ (function (_super) {
         // Resolves a confirmation message on success
         _this.makeAndUpload = function (relDir, fnames) {
             var _a;
-            var newDirectory = upath_1.default.join(_this.config.remoteRoot, relDir);
+            var newDirectory = upath_1.default.join(
+                _this.config.remoteRoot,
+                relDir
+            );
             // @ts-ignore TODO
-            return (_a = _this.makeDir(newDirectory)) === null || _a === void 0 ? void 0 : _a.then(function () {
-                return bluebird_1.default.mapSeries(fnames, function (fname) {
-                    var tmpFileName = upath_1.default.join(_this.config.localRoot, relDir, fname);
-                    var tmp = fs_1.default.readFileSync(tmpFileName);
-                    _this.eventObject["filename"] = upath_1.default.join(relDir, fname);
-                    _this.emit("uploading", _this.eventObject);
-                    return _this.ftpPut(tmp, upath_1.default.join(_this.config.remoteRoot, relDir, fname))
-                        .then(function () {
-                        _this.eventObject.transferredFileCount++;
-                        _this.emit("uploaded", _this.eventObject);
-                        return Promise.resolve("uploaded " + tmpFileName);
-                    })
-                        .catch(function (err) {
-                        _this.eventObject["error"] = err;
-                        _this.emit("upload-error", _this.eventObject);
-                        // if continue on error....
-                        return Promise.reject(err);
-                    });
-                });
-            });
+            return (_a = _this.makeDir(newDirectory)) === null || _a === void 0
+                ? void 0
+                : _a.then(function () {
+                      return bluebird_1.default.mapSeries(
+                          fnames,
+                          function (fname) {
+                              var tmpFileName = upath_1.default.join(
+                                  _this.config.localRoot,
+                                  relDir,
+                                  fname
+                              );
+                              var tmp = fs_1.default.readFileSync(tmpFileName);
+                              _this.eventObject["filename"] =
+                                  upath_1.default.join(relDir, fname);
+                              _this.emit("uploading", _this.eventObject);
+                              return _this
+                                  .ftpPut(
+                                      tmp,
+                                      upath_1.default.join(
+                                          _this.config.remoteRoot,
+                                          relDir,
+                                          fname
+                                      )
+                                  )
+                                  .then(function () {
+                                      _this.eventObject.transferredFileCount++;
+                                      _this.emit("uploaded", _this.eventObject);
+                                      return Promise.resolve(
+                                          "uploaded " + tmpFileName
+                                      );
+                                  })
+                                  .catch(function (err) {
+                                      _this.eventObject["error"] = err;
+                                      _this.emit(
+                                          "upload-error",
+                                          _this.eventObject
+                                      );
+                                      // if continue on error....
+                                      return Promise.reject(err);
+                                  });
+                          }
+                      );
+                  });
         };
         // connects to the server, Resolves the config on success
         _this.connect = function () {
@@ -128,23 +205,27 @@ var FtpDeployer = /** @class */ (function (_super) {
                 _this.ftp.on("end", _this.handleDisconnect);
                 _this.ftp.on("close", _this.handleDisconnect);
             }
-            return _this.ftpConnect()
+            return _this
+                .ftpConnect()
                 .then(function (serverMessage) {
-                _this.emit("log", "Connected to: " + _this.config.host);
-                _this.emit("log", "Connected: Server message: " + serverMessage);
-                // sftp does not provide a connection status
-                // so instead provide one ourself
-                if (_this.config.sftp) {
-                    _this.connectionStatus = "connected";
-                }
-                return _this.config;
-            })
+                    _this.emit("log", "Connected to: " + _this.config.host);
+                    _this.emit(
+                        "log",
+                        "Connected: Server message: " + serverMessage
+                    );
+                    // sftp does not provide a connection status
+                    // so instead provide one ourself
+                    if (_this.config.sftp) {
+                        _this.connectionStatus = "connected";
+                    }
+                    return _this.config;
+                })
                 .catch(function (err) {
-                return Promise.reject({
-                    code: err.code,
-                    message: "connect: " + err.message,
+                    return Promise.reject({
+                        code: err.code,
+                        message: "connect: " + err.message,
+                    });
                 });
-            });
         };
         _this.getConnectionStatus = function () {
             // only ftp client provides connection status
@@ -160,12 +241,19 @@ var FtpDeployer = /** @class */ (function (_super) {
         // creates list of all files to upload and starts upload process
         _this.checkLocalAndUpload = function () {
             try {
-                var filemap = lib.parseLocal(_this.config.include, _this.config.exclude, _this.config.localRoot, "/");
-                _this.emit("log", "Files found to upload: " + JSON.stringify(filemap));
+                var filemap = lib.parseLocal(
+                    _this.config.include,
+                    _this.config.exclude,
+                    _this.config.localRoot,
+                    "/"
+                );
+                _this.emit(
+                    "log",
+                    "Files found to upload: " + JSON.stringify(filemap)
+                );
                 _this.eventObject["totalFilesCount"] = lib.countFiles(filemap);
                 return _this.makeAllAndUpload(filemap);
-            }
-            catch (e) {
+            } catch (e) {
                 return Promise.reject(e);
             }
         };
@@ -176,14 +264,20 @@ var FtpDeployer = /** @class */ (function (_super) {
                 return lib
                     .deleteDir(_this.ftp, _this.config.remoteRoot)
                     .then(function () {
-                    _this.emit("log", "Deleted directory: " + _this.config.remoteRoot);
-                    return _this.config;
-                })
+                        _this.emit(
+                            "log",
+                            "Deleted directory: " + _this.config.remoteRoot
+                        );
+                        return _this.config;
+                    })
                     .catch(function (err) {
-                    _this.emit("log", "Deleting failed, trying to continue: " +
-                        JSON.stringify(err));
-                    return Promise.resolve(_this.config);
-                });
+                        _this.emit(
+                            "log",
+                            "Deleting failed, trying to continue: " +
+                                JSON.stringify(err)
+                        );
+                        return Promise.resolve(_this.config);
+                    });
             }
             return Promise.resolve(_this.config);
         };
@@ -195,28 +289,31 @@ var FtpDeployer = /** @class */ (function (_super) {
                 .then(_this.deleteRemote)
                 .then(_this.checkLocalAndUpload)
                 .then(function (res) {
-                console.log({ res: res });
-                _this.ftp.end();
-                if (typeof cb == "function") {
-                    cb(null, res);
-                }
-                else {
-                    return Promise.resolve(res);
-                }
-            })
-                .catch(function (err) {
-                if (_this.ftp && _this.getConnectionStatus() != "disconnected")
+                    console.log({ res: res });
                     _this.ftp.end();
-                if (typeof cb == "function") {
-                    cb(err, null);
-                }
-                else {
-                    return Promise.reject(err);
-                }
-            });
+                    if (typeof cb == "function") {
+                        cb(null, res);
+                    } else {
+                        return Promise.resolve(res);
+                    }
+                })
+                .catch(function (err) {
+                    if (
+                        _this.ftp &&
+                        _this.getConnectionStatus() != "disconnected"
+                    )
+                        _this.ftp.end();
+                    if (typeof cb == "function") {
+                        cb(err, null);
+                    } else {
+                        return Promise.reject(err);
+                    }
+                });
         };
         _this.config = config;
-        _this.ftp = _this.config.sftp ? new ssh2_sftp_client_1.default() : new promise_ftp_1.default();
+        _this.ftp = _this.config.sftp
+            ? new ssh2_sftp_client_1.default()
+            : new promise_ftp_1.default();
         _this.eventObject = {
             totalFilesCount: 0,
             transferredFileCount: 0,
@@ -226,5 +323,5 @@ var FtpDeployer = /** @class */ (function (_super) {
         return _this;
     }
     return FtpDeployer;
-}(events_1.default.EventEmitter));
+})(events_1.default.EventEmitter);
 exports.default = FtpDeployer;
