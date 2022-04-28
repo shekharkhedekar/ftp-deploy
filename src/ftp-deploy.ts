@@ -2,6 +2,9 @@ import upath from "upath";
 import events from "events";
 import Bluebird from "bluebird";
 import fs from "fs";
+import PromiseFtp from "promise-ftp";
+import PromiseSftp from "ssh2-sftp-client";
+
 import {
     CheckLocalAndUploadFunc,
     Config,
@@ -16,10 +19,6 @@ import {
     MakeDirFunc,
     UploadResponse,
 } from "./types";
-
-import PromiseFtp from "promise-ftp";
-import PromiseSftp from "ssh2-sftp-client";
-
 import * as lib from "./lib";
 
 class FtpDeployer extends events.EventEmitter {
