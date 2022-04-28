@@ -49,16 +49,19 @@ export type GetConnectionStatusFunc = () => string;
 
 export type HandleDisconnectFunc = () => void;
 
-export type CheckLocalAndUploadFunc = () =>
-    | globalThis.Promise<void | void[]>
-    | Promise<void | void[]>;
+export type CheckLocalAndUploadFunc = () => PromiseLike<void | void[]>;
 
 export type DeleteRemoteFunc = () => Config;
 
 export type UploadResponse = string[][];
+
 export type DeployFunc = (
     cb: (err: Error | null, res: void | void[] | null) => void
 ) => void;
+
+export type FtpPutFunc = (f: Buffer, dir: string) => globalThis.Promise<void>;
+
+export type FtpConnectFunc = () => globalThis.Promise<string | SFTPWrapper>;
 
 export interface ConnectionError extends Error {
     code: number;
