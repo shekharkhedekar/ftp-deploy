@@ -16,7 +16,6 @@ The most basic usage:
 
 ```js
 const FtpDeploy = require("ftp-deploy");
-const ftpDeploy = new FtpDeploy();
 
 const config = {
     user: "user",
@@ -42,18 +41,20 @@ const config = {
     // use sftp or ftp
     sftp: false,
 };
+const ftpDeploy = new FtpDeploy(config);
 
 ftpDeploy
-    .deploy(config)
+    .deploy()
     .then((res) => console.log("finished:", res))
     .catch((err) => console.log(err));
 ```
 
 **Note:**
 
--   in version 2 the config file expects a field of `user` rather than `username` in 1.x.
+-   In version 2 the config file expects a field of `user` rather than `username` in 1.x.
 -   The config file is passed as-is to Promise-FTP.
 -   I create a file - e.g. deploy.js - in the root of my source code and add a script to its `package.json` so that I can `npm run deploy`.
+-   In version 3, the config is passed to the `FTPDeployer` constructor rather than the `deploy` method.
 
 ```json
 "scripts": {
@@ -65,7 +66,7 @@ ftpDeploy
 
 ```js
 // use with callback
-ftpDeploy.deploy(config, function (err, res) {
+ftpDeploy.deploy(function (err, res) {
     if (err) console.log(err);
     else console.log("finished:", res);
 });
