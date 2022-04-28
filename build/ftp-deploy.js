@@ -14,6 +14,29 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -22,18 +45,9 @@ var upath_1 = __importDefault(require("upath"));
 var events_1 = __importDefault(require("events"));
 var bluebird_1 = __importDefault(require("bluebird"));
 var fs_1 = __importDefault(require("fs"));
-var PromiseFtp = require("promise-ftp");
-var PromiseSftp = require("ssh2-sftp-client");
-var lib = require("./lib");
-/* interim structure
-{
-    '/': ['test-inside-root.txt'],
-    'folderA': ['test-inside-a.txt'],
-    'folderA/folderB': ['test-inside-b.txt'],
-    'folderA/folderB/emptyC': [],
-    'folderA/folderB/emptyC/folderD': ['test-inside-d-1.txt', 'test-inside-d-2.txt']
-}
-*/
+var promise_ftp_1 = __importDefault(require("promise-ftp"));
+var ssh2_sftp_client_1 = __importDefault(require("ssh2-sftp-client"));
+var lib = __importStar(require("./lib"));
 var FtpDeployer = /** @class */ (function (_super) {
     __extends(FtpDeployer, _super);
     function FtpDeployer(config) {
@@ -43,6 +57,32 @@ var FtpDeployer = /** @class */ (function (_super) {
             return bluebird_1.default.mapSeries(keys, function (key) {
                 return _this.makeAndUpload(key, filemap[key]);
             });
+        };
+        // Wrapper of this.ftp.put to handle disparate returns of PromiseFtp and PromiseSftp
+        _this.ftpPut = function (f, dir) {
+            if (_this.ftp instanceof ssh2_sftp_client_1.default) {
+                return _this.ftp.put(f, dir).then(function () {
+                    return Promise.resolve();
+                });
+            }
+            else {
+                return _this.ftp.put(f, dir).then(function () {
+                    return Promise.resolve();
+                });
+            }
+        };
+        // Wrapper of this.ftp.connect to handle disparate returns of PromiseFtp and PromiseSftp
+        _this.ftpConnect = function () {
+            if (_this.ftp instanceof ssh2_sftp_client_1.default) {
+                return _this.ftp.connect(_this.config).then(function (serverMessage) {
+                    return Promise.resolve(serverMessage);
+                });
+            }
+            else {
+                return _this.ftp.connect(_this.config).then(function (serverMessage) {
+                    return Promise.resolve(serverMessage);
+                });
+            }
         };
         _this.makeDir = function (newDirectory) {
             if (newDirectory === "/") {
@@ -64,8 +104,7 @@ var FtpDeployer = /** @class */ (function (_super) {
                     var tmp = fs_1.default.readFileSync(tmpFileName);
                     _this.eventObject["filename"] = upath_1.default.join(relDir, fname);
                     _this.emit("uploading", _this.eventObject);
-                    return _this.ftp
-                        .put(tmp, upath_1.default.join(_this.config.remoteRoot, relDir, fname))
+                    return _this.ftpPut(tmp, upath_1.default.join(_this.config.remoteRoot, relDir, fname))
                         .then(function () {
                         _this.eventObject.transferredFileCount++;
                         _this.emit("uploaded", _this.eventObject);
@@ -84,13 +123,12 @@ var FtpDeployer = /** @class */ (function (_super) {
         _this.connect = function () {
             // sftp client does not provide a connection status
             // so instead provide one ourselfs
-            if (_this.config.sftp) {
+            if ("on" in _this.ftp) {
                 _this.connectionStatus = "disconnected";
                 _this.ftp.on("end", _this.handleDisconnect);
                 _this.ftp.on("close", _this.handleDisconnect);
             }
-            return _this.ftp
-                .connect(_this.config)
+            return _this.ftpConnect()
                 .then(function (serverMessage) {
                 _this.emit("log", "Connected to: " + _this.config.host);
                 _this.emit("log", "Connected: Server message: " + serverMessage);
@@ -111,7 +149,8 @@ var FtpDeployer = /** @class */ (function (_super) {
         _this.getConnectionStatus = function () {
             // only ftp client provides connection status
             // sftp client connection status is handled using events
-            return typeof _this.ftp.getConnectionStatus === "function"
+            return "getConnectionStatus" in _this.ftp &&
+                typeof _this.ftp.getConnectionStatus === "function"
                 ? _this.ftp.getConnectionStatus()
                 : _this.connectionStatus;
         };
@@ -177,12 +216,13 @@ var FtpDeployer = /** @class */ (function (_super) {
             });
         };
         _this.config = config;
-        _this.ftp = _this.config.sftp ? new PromiseSftp() : new PromiseFtp();
+        _this.ftp = _this.config.sftp ? new ssh2_sftp_client_1.default() : new promise_ftp_1.default();
         _this.eventObject = {
             totalFilesCount: 0,
             transferredFileCount: 0,
             filename: "",
         };
+        _this.connectionStatus = "disconnected";
         return _this;
     }
     return FtpDeployer;

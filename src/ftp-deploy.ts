@@ -12,6 +12,9 @@ import {
     DeleteRemoteFunc,
     DeployFunc,
     FileMap,
+    Ftp,
+    FtpConnectFunc,
+    FtpPutFunc,
     GetConnectionStatusFunc,
     HandleDisconnectFunc,
     MakeAllAndUploadFunc,
@@ -52,6 +55,32 @@ class FtpDeployer extends events.EventEmitter {
         });
     };
 
+    // Wrapper of this.ftp.put to handle disparate returns of PromiseFtp and PromiseSftp
+    ftpPut: FtpPutFunc = (f, dir) => {
+        if (this.ftp instanceof PromiseSftp) {
+            return this.ftp.put(f, dir).then(() => {
+                return Promise.resolve();
+            });
+        } else {
+            return this.ftp.put(f, dir).then(() => {
+                return Promise.resolve();
+            });
+        }
+    };
+
+    // Wrapper of this.ftp.connect to handle disparate returns of PromiseFtp and PromiseSftp
+    ftpConnect: FtpConnectFunc = () => {
+        if (this.ftp instanceof PromiseSftp) {
+            return this.ftp.connect(this.config).then((serverMessage) => {
+                return Promise.resolve(serverMessage);
+            });
+        } else {
+            return this.ftp.connect(this.config).then((serverMessage) => {
+                return Promise.resolve(serverMessage);
+            });
+        }
+    };
+
     makeDir: MakeDirFunc = (newDirectory) => {
         if (newDirectory === "/") {
             return Promise.resolve("unused");
@@ -76,8 +105,10 @@ class FtpDeployer extends events.EventEmitter {
 
                 this.emit("uploading", this.eventObject);
 
-                return this.ftp
-                    .put(tmp, upath.join(this.config.remoteRoot, relDir, fname))
+                return this.ftpPut(
+                    tmp,
+                    upath.join(this.config.remoteRoot, relDir, fname)
+                )
                     .then(() => {
                         this.eventObject.transferredFileCount++;
                         this.emit("uploaded", this.eventObject);
@@ -103,9 +134,8 @@ class FtpDeployer extends events.EventEmitter {
             this.ftp.on("close", this.handleDisconnect);
         }
 
-        return this.ftp
-            .connect(this.config)
-            .then((serverMessage: string) => {
+        return this.ftpConnect()
+            .then((serverMessage) => {
                 this.emit("log", "Connected to: " + this.config.host);
                 this.emit("log", "Connected: Server message: " + serverMessage);
 
