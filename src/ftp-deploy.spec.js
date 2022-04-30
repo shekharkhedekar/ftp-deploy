@@ -5,7 +5,7 @@ const fs = require("fs");
 const utils = require("util");
 const del = require("delete");
 
-const FtpDeploy = require("./ftp-deploy");
+const FtpDeploy = require("./ftp-deploy").default;
 
 const statP = utils.promisify(fs.stat);
 
