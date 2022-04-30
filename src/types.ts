@@ -21,7 +21,7 @@ export type ConnectionStatus =
 
 export type FileMap = { [key: string]: string[] };
 
-export type Ftp = PromiseFtp | PromiseSftp | null;
+export type Ftp = PromiseFtp | PromiseSftp;
 
 export interface EventObject {
     totalFilesCount: number;
@@ -36,7 +36,7 @@ export type MakeAllAndUploadFunc = (
 
 export type MakeDirFunc = (
     newDirectory: string
-) => globalThis.Promise<string> | Promise<string> | Promise<void> | undefined;
+) => globalThis.Promise<string> | Promise<void>;
 
 export type MakeAndUploadFunc = (
     relDir: string,
@@ -54,7 +54,7 @@ export type HandleDisconnectFunc = () => void;
 
 export type CheckLocalAndUploadFunc = () => PromiseLike<void | void[]>;
 
-export type DeleteRemoteFunc = () => Config;
+export type DeleteRemoteFunc = () => globalThis.Promise<Config>;
 
 export type UploadResponse = string[][];
 

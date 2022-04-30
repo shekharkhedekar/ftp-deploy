@@ -28,7 +28,7 @@ export * from "./types";
 
 class FtpDeployer extends events.EventEmitter {
     config: Config;
-    ftp: PromiseFtp | PromiseSftp;
+    ftp: Ftp;
     eventObject: {
         totalFilesCount: number;
         transferredFileCount: number;
@@ -203,7 +203,7 @@ class FtpDeployer extends events.EventEmitter {
                         "log",
                         "Deleted directory: " + this.config.remoteRoot
                     );
-                    return this.config;
+                    return Promise.resolve(this.config);
                 })
                 .catch((err: Error) => {
                     this.emit(
