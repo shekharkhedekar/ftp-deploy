@@ -24,6 +24,8 @@ import {
 } from "./types";
 import * as lib from "./lib";
 
+export * from "./types";
+
 class FtpDeployer extends events.EventEmitter {
     config: Config;
     ftp: PromiseFtp | PromiseSftp;
@@ -231,8 +233,10 @@ class FtpDeployer extends events.EventEmitter {
                 }
             })
             .catch((err: Error) => {
-                if (this.ftp && this.getConnectionStatus() != "disconnected")
+                if (this.ftp && this.getConnectionStatus() === "connected") {
                     this.ftp.end();
+                }
+
                 if (typeof cb == "function") {
                     cb(err, null);
                 } else {

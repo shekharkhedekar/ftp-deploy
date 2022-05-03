@@ -6,7 +6,7 @@ import events from "events";
 
 export interface Config extends PromiseSftp.ConnectOptions {
     deleteRemote?: boolean;
-    exclude: string[];
+    exclude?: string[];
     include: string[];
     localRoot: string;
     remoteRoot: string;
@@ -14,7 +14,10 @@ export interface Config extends PromiseSftp.ConnectOptions {
     user: string;
 }
 
-export type ConnectionStatus = "disconnected" | "connected";
+export type ConnectionStatus =
+    | "disconnected"
+    | "connected"
+    | "not yet connected";
 
 export type FileMap = { [key: string]: string[] };
 
