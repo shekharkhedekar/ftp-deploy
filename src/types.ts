@@ -12,6 +12,7 @@ export interface FtpDeployConfig {
     exclude?: string[];
     sftp?: boolean;
     password?: string;
+    uploadNewFilesOnly?: boolean;
 }
 
 export type FileMap = Record<string, string[]>;
@@ -21,6 +22,7 @@ export type Ftp = PromiseFtp | PromiseSftp;
 export interface EventObject {
     totalFilesCount: number;
     transferredFileCount: number;
-    filename: string;
+    skippedFileCount: number;
+    filename?: string;
     error?: Error;
 }

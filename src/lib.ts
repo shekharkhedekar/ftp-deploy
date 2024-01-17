@@ -1,5 +1,6 @@
 import * as FtpClient from "ftp";
 import fs from "fs";
+import crypto from "crypto";
 import path from "path";
 import util from "util";
 import Promise from "bluebird";
@@ -94,7 +95,6 @@ function parseLocal(
             // currItem is a file
             // acc[relDir] is always created at previous iteration
             if (canIncludePath(includes, excludes, newRelDir)) {
-                // console.log("including", currItem);
                 acc[relDir].push(item);
                 return acc;
             }
@@ -157,10 +157,15 @@ function mkDirExists(ftp: Ftp, dir: string) {
             return Promise.resolve();
         } else {
             console.log("[mkDirExists]", err.message);
-            // console.log(Object.getOwnPropertyNames(err));
             return Promise.reject(err);
         }
     });
+}
+
+function createHash(content: string) {
+    const hash = crypto.createHash("md5");
+    const data = hash.update(content, "utf-8");
+    return data.digest("hex");
 }
 
 export default {
@@ -171,4 +176,5 @@ export default {
     countFiles: countFiles,
     mkDirExists: mkDirExists,
     deleteDir: deleteDir,
+    createHash: createHash,
 };

@@ -1,3 +1,4 @@
+import * as FtpClient from "ftp";
 import upath from "upath";
 import events from "events";
 import fs from "fs";
@@ -7,6 +8,7 @@ import Promise from "bluebird";
 
 import lib from "./lib";
 import { EventObject, FileMap, Ftp, FtpDeployConfig } from "./types";
+import sftp from "ssh2-sftp-client";
 
 export * from "./types";
 
@@ -36,18 +38,18 @@ class FtpDeployer extends events.EventEmitter {
         this.eventObject = {
             totalFilesCount: 0,
             transferredFileCount: 0,
-            filename: "",
+            skippedFileCount: 0,
+            filename: undefined,
             error: undefined,
         };
     }
 
-    private makeAllAndUpload = (
-        remoteDir: FtpDeployConfig,
-        filemap: FileMap
-    ) => {
+    private makeAllAndUpload = (config: FtpDeployConfig, filemap: FileMap) => {
         let keys = Object.keys(filemap);
         return Promise.mapSeries(keys, (key) => {
-            return this.makeAndUpload(remoteDir, key, filemap[key]);
+            return this.filterFiles(config, key, filemap[key]).then((files) => {
+                return this.makeAndUpload(config, key, files);
+            });
         });
     };
 
@@ -63,6 +65,50 @@ class FtpDeployer extends events.EventEmitter {
         return this.ftp.mkdir(newDirectory, true);
     };
 
+    private filterFiles = async (
+        config: FtpDeployConfig,
+        relDir: string,
+        fnames: string[]
+    ) => {
+        if (this.ftp === null) {
+            return Promise.reject("ftp object is null");
+        }
+
+        if (!config.uploadNewFilesOnly) {
+            return Promise.resolve(fnames);
+        }
+
+        const remoteDir = upath.join(config.remoteRoot, relDir);
+        const localDir = upath.join(config.localRoot, relDir);
+        const filteredFiles: string[] = [];
+
+        for (const fname of fnames) {
+            const localFilePath = upath.join(localDir, fname);
+            const localFile = fs.readFileSync(localFilePath, "utf8");
+            const localFileHash = lib.createHash(localFile);
+
+            const remoteFilePath = upath.join(remoteDir, fname);
+            try {
+                const remoteFile = await this.ftp.get(remoteFilePath);
+                const remoteFileHash = lib.createHash(remoteFile.toString());
+
+                if (localFileHash !== remoteFileHash) {
+                    filteredFiles.push(fname);
+                } else {
+                    this.eventObject["filename"] = upath.join(relDir, fname);
+                    this.eventObject.skippedFileCount++;
+                    this.emit("skipped", this.eventObject);
+                }
+            } catch (e) {
+                // Remote file does not exist, so upload it
+                filteredFiles.push(fname);
+                continue;
+            }
+        }
+
+        return filteredFiles;
+    };
+
     // Creates a remote directory and uploads all of the files in it
     // Resolves a confirmation message on success
     private makeAndUpload = (
@@ -74,7 +120,7 @@ class FtpDeployer extends events.EventEmitter {
 
         // TODO reconcile FTP types
         return (this.makeDir(newDirectory) as Promise<void>).then(() => {
-            return Promise.mapSeries(fnames, (fname) => {
+            return Promise.mapSeries(fnames, async (fname) => {
                 if (this.ftp === null) {
                     return Promise.reject("ftp object is null");
                 }
@@ -85,13 +131,13 @@ class FtpDeployer extends events.EventEmitter {
 
                 this.emit("uploading", this.eventObject);
 
+                const remoteFilePath = upath.join(
+                    config.remoteRoot,
+                    relDir,
+                    fname
+                );
                 // TODO reconcile FTP types
-                return (
-                    this.ftp.put(
-                        tmp,
-                        upath.join(config.remoteRoot, relDir, fname)
-                    ) as Promise<void>
-                )
+                return (this.ftp.put(tmp, remoteFilePath) as Promise<void>)
                     .then(() => {
                         this.eventObject.transferredFileCount++;
                         this.emit("uploaded", this.eventObject);
@@ -213,10 +259,12 @@ class FtpDeployer extends events.EventEmitter {
                 }
 
                 this.ftp.end();
+                delete this.eventObject["filename"];
+                delete this.eventObject["error"];
                 if (typeof cb == "function") {
-                    cb(null, res);
+                    cb(null, this.eventObject);
                 } else {
-                    return Promise.resolve(res);
+                    return Promise.resolve(this.eventObject);
                 }
             })
             .catch((err: Error) => {
